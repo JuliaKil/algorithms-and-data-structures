@@ -46,19 +46,29 @@ public:
 	}
 	void balance() {
 		if (head->balancefactor() == 2) {
-			if (head->right->balancefactor() < 0)
+			if (head->right->balancefactor() < 0) {
+				Node* fixhead = head;
+				head = head->right;
 				rotateright();
+				fixhead->right = head;
+				head = fixhead;
+			}
 			rotateleft();
 		}
 		if (head->balancefactor() == -2) {
-			if (head->left->balancefactor() > 0)
+			if (head->left->balancefactor() > 0) {
+				Node* fixhead = head;
+				head = head->left;
 				rotateleft();
+				fixhead->left = head;
+				head = fixhead;
+			}
 			rotateright();
 		}	
 	}
-	Node* findmin() {
+	Node* findminp() {
 		Node* fixhead = head;
-		Node* prev = nullptr;
+		Node* prev = head;
 		head = head->right;
 		while (head->left->height() > 1)
 			prev = head;
@@ -71,16 +81,22 @@ public:
 			head = new Node(d);
 		else {
 			Node* fixhead = head;
-			while (head->height() > 1) {
+			while (true) {
 				if (head->data > d)
-					head = head->left;
+					if (head->left == nullptr) {
+						head->left = new Node(d);
+						break;
+					}
+					else
+						head = head->left;
 				else
-					head = head->right;
+					if (head->right == nullptr) {
+						head->right = new Node(d);
+						break;
+					}
+					else
+						head = head->right;
 			}
-			if (head->data > d)
-				head->left = new Node(d);
-			else
-				head->right = new Node(d);
 			head = fixhead;
 			balance();
 		}
@@ -110,7 +126,7 @@ public:
 			return false;
 		Node* fixhead = head;
 		Node* prev = nullptr;
-		while ((head->height() > 1) && (head->data != d)) {
+		while (head->height() > 1 && head->data != d) {
 			prev = head;
 			if (head->data > d)
 				head = head->left;
@@ -127,11 +143,11 @@ public:
 				prev->right = head->left;
 			}
 			else {
-				Node* prevm = findmin();
+				Node* prevm = findminp();
 				prev->right = prevm->left;
+				prevm->left = nullptr;
 				prev->right->left = head->left;
 				prev->right->right = head->right;
-				prevm->left = nullptr;
 			}
 		}
 		if (head == prev->left) {
@@ -144,11 +160,11 @@ public:
 				prev->left = head->left;
 			}
 			else {
-				Node* prevm = findmin();
+				Node* prevm = findminp();
 				prev->left = prevm->left;
+				prevm->left = nullptr;
 				prev->left->left = head->left;
 				prev->left->right = head->right;
-				prevm->left = nullptr;
 			}
 		}
 		head = fixhead;
